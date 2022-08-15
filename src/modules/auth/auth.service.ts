@@ -10,6 +10,8 @@ import { IUser } from "../users/users.model";
 import { ThrowException } from "../../exceptions/throw-exception";
 import { ResetpasswordTokenservice } from "../../services/token/password-reset/reset-password.service";
 import { TokenCreator } from "../../services/token/payload-token.service";
+import isEmail from "validator/lib/isEmail";
+import { LoginUserDto } from "../users/dto/log-in-user.dto";
 
 export class AuthService {
   private userService: UserService = new UserService();
@@ -94,25 +96,25 @@ export class AuthService {
   }
 
   // sign in user
-  public async signIn(createuserDto: CreateUserDto) {
+  public async signIn(loginUserDto: LoginUserDto) {
     let method: LoginMethod;
-    let identifier: string;
+    let identifier = loginUserDto.identifier;
 
-    if (!createuserDto.username && !createuserDto.email) {
+    if (
+      !loginUserDto.identifier ||
+      !loginUserDto.password
+    ) {
       ThrowException.badRequest(
         "Username or email is required"
       );
     }
 
-    if (createuserDto.username) {
-      method = LoginMethod.USERNAME;
-      identifier = createuserDto.username;
-    } else if (createuserDto.email) {
+    const isActualEmail = isEmail(loginUserDto.identifier);
+
+    if (isActualEmail) {
       method = LoginMethod.EMAIL;
-      identifier = createuserDto.email;
     } else {
-      method = LoginMethod.INVALID;
-      identifier = "";
+      method = LoginMethod.USERNAME;
     }
 
     // find user by identifier
@@ -139,7 +141,7 @@ export class AuthService {
 
     //compare password
     const isValid = await this.comparePassword(
-      createuserDto.password,
+      loginUserDto.password,
       user?.password as string
     );
 

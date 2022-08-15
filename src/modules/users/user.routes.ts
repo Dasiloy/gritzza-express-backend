@@ -8,7 +8,7 @@ const router = Router();
 
 // show current user route
 router.get(
-  "/show",
+  "/auth",
   passport.authenticate("jwt", { session: false }),
   userController.getUserFromQuery
 );

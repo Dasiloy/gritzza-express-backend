@@ -26,14 +26,13 @@ class UserService {
         }
     }
     // create user
-    async createUser(createUserDto) {
+    async createUser(createUserDto, config = { isAdmin: false }) {
         // temp for new user
         const newUserTemp = {
             username: createUserDto.username,
             password: createUserDto.password,
             email: createUserDto.email,
             role: createUserDto.role,
-            verified: createUserDto.verified,
         };
         // check if password matches the regex
         this.checkPasswordAgainstRegex(createUserDto.password);
@@ -58,19 +57,21 @@ class UserService {
                 : "Verify your email");
         }
         // create user
-        return users_model_1.userModel.create(newUserTemp);
+        return users_model_1.userModel.create(config.isAdmin
+            ? { ...newUserTemp, verified: true }
+            : { ...newUserTemp });
     }
     // create user by admin
     async createUserByAdmin(createUserDto) {
-        createUserDto.verified = true;
-        const user = await this.createUser(createUserDto);
+        const user = await this.createUser(createUserDto, {
+            isAdmin: true,
+        });
         return user;
     }
     // create user by signUp
     async createUserBySignUp(createUserDto) {
-        createUserDto.verified = false;
         if (createUserDto.role === users_model_1.UserRole.ADMIN) {
-            throw_exception_1.ThrowException.badRequest("Invalid role");
+            throw_exception_1.ThrowException.badRequest("Only users can sign up");
         }
         return this.createUser(createUserDto);
     }

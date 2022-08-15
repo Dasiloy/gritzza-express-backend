@@ -46,14 +46,16 @@ export class UserService {
   }
 
   // create user
-  public async createUser(createUserDto: CreateUserDto) {
+  public async createUser(
+    createUserDto: CreateUserDto,
+    config = { isAdmin: false }
+  ) {
     // temp for new user
     const newUserTemp = {
       username: createUserDto.username,
       password: createUserDto.password,
       email: createUserDto.email,
       role: createUserDto.role,
-      verified: createUserDto.verified,
     };
 
     // check if password matches the regex
@@ -87,15 +89,20 @@ export class UserService {
       );
     }
     // create user
-    return userModel.create(newUserTemp);
+    return userModel.create(
+      config.isAdmin
+        ? { ...newUserTemp, verified: true }
+        : { ...newUserTemp }
+    );
   }
 
   // create user by admin
   public async createUserByAdmin(
     createUserDto: CreateUserDto
   ) {
-    createUserDto.verified = true;
-    const user = await this.createUser(createUserDto);
+    const user = await this.createUser(createUserDto, {
+      isAdmin: true,
+    });
     return user;
   }
 
@@ -103,9 +110,8 @@ export class UserService {
   public async createUserBySignUp(
     createUserDto: CreateUserDto
   ) {
-    createUserDto.verified = false;
     if (createUserDto.role === UserRole.ADMIN) {
-      ThrowException.badRequest("Invalid role");
+      ThrowException.badRequest("Only users can sign up");
     }
     return this.createUser(createUserDto);
   }

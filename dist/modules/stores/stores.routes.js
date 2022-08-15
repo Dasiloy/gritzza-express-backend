@@ -13,7 +13,7 @@ const router = (0, express_1.Router)();
 router.post("/", passport_1.default.authenticate("jwt", { session: false }), (0, user_permissions_1.userPermissions)(users_model_1.UserRole.MERCHANT), stores_controller_1.default.createStore);
 // get all stores -- everyone can see stores
 router.get("/", stores_controller_1.default.getAllStores);
-// search stores -- only authenticated user can see stores
+// search stores -- only authenticated user can search stores
 router.get("/search", passport_1.default.authenticate("jwt", {
     session: false,
 }), stores_controller_1.default.searchStores);

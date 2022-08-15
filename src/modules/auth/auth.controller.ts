@@ -2,26 +2,23 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { ThrowException } from "../../exceptions/throw-exception";
 import { CreateUserDto } from "../users/dto/create-user.dto";
+import { LoginUserDto } from "../users/dto/log-in-user.dto";
 import { AuthService } from "./auth.service";
 
 // handler for POST /api/auth/signup
 async function signUp(req: Request, res: Response) {
   const createuserDto: CreateUserDto = req.body;
   const authService = new AuthService();
-  const { user } = await authService.signUp(
-    createuserDto
-  );
+  const { user } = await authService.signUp(createuserDto);
   res.status(StatusCodes.CREATED).json({
-    user: {
-      email: user.email,
-      username: user.username,
-    },
+    email: user.email,
+    username: user.username,
   });
 }
 
 // handler for POST /api/auth/signin
 async function signIn(req: Request, res: Response) {
-  const loginUserDto: CreateUserDto = req.body;
+  const loginUserDto: LoginUserDto = req.body;
   const authService = new AuthService();
   const { token, tokenUser } = await authService.signIn(
     loginUserDto
@@ -55,16 +52,14 @@ async function resendVerificationToken(
   res: Response
 ) {
   const authService = new AuthService();
- await authService.resendVerificationToken(
-    req.body.email
-  );
+  await authService.resendVerificationToken(req.body.email);
   res.status(StatusCodes.OK).send();
 }
 
 // handler for POST /api/auth/forgot-password
 async function forgotPassword(req: Request, res: Response) {
   const authService = new AuthService();
- await authService.forgotPassword(req.body.email);
+  await authService.forgotPassword(req.body.email);
   res.status(StatusCodes.OK).send();
 }
 

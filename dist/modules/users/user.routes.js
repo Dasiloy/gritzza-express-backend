@@ -10,7 +10,7 @@ const user_permissions_1 = require("../../middleware/user-permissions");
 const users_model_1 = require("./users.model");
 const router = (0, express_1.Router)();
 // show current user route
-router.get("/show", passport_1.default.authenticate("jwt", { session: false }), user_controller_1.default.getUserFromQuery);
+router.get("/auth", passport_1.default.authenticate("jwt", { session: false }), user_controller_1.default.getUserFromQuery);
 // show all users route -- admin only
 router.get("/admin", passport_1.default.authenticate("jwt", { session: false }), (0, user_permissions_1.userPermissions)(users_model_1.UserRole.ADMIN), user_controller_1.default.getAllUsers);
 // create user route -- admin only

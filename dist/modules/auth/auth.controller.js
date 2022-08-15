@@ -9,10 +9,8 @@ async function signUp(req, res) {
     const authService = new auth_service_1.AuthService();
     const { user } = await authService.signUp(createuserDto);
     res.status(http_status_codes_1.StatusCodes.CREATED).json({
-        user: {
-            email: user.email,
-            username: user.username,
-        },
+        email: user.email,
+        username: user.username,
     });
 }
 // handler for POST /api/auth/signin

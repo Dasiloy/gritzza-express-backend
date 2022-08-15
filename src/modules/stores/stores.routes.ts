@@ -17,7 +17,7 @@ router.post(
 // get all stores -- everyone can see stores
 router.get("/", storeController.getAllStores);
 
-// search stores -- only authenticated user can see stores
+// search stores -- only authenticated user can search stores
 router.get(
   "/search",
   passport.authenticate("jwt", {

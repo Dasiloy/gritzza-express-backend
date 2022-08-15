@@ -8,20 +8,24 @@ import morgan from "morgan";
 import { Logger } from "./services/logger.service";
 import { notFoundMiddleware } from "./middleware/not-found";
 import { errorHandlerMiddleware } from "./middleware/error-handler";
+import cors from "cors";
 
 // routes imports
 import userRouter from "./modules/users/user.routes";
-import authRouter from "./modules/auth/auth.router";
+import authRouter from "./modules/auth/auth.routes";
 import storeRouter from "./modules/stores/stores.routes";
 import productRouter from "./modules/products/products.routes";
 
 dotenv.config();
 const app = express();
 
+// security middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.static("static"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+
 
 // routes
 app.use("/api/users", userRouter);

@@ -11,6 +11,7 @@ const verification_token_service_1 = require("../../services/token/verification/
 const throw_exception_1 = require("../../exceptions/throw-exception");
 const reset_password_service_1 = require("../../services/token/password-reset/reset-password.service");
 const payload_token_service_1 = require("../../services/token/payload-token.service");
+const isEmail_1 = __importDefault(require("validator/lib/isEmail"));
 class AuthService {
     constructor() {
         this.userService = new user_service_1.UserService();
@@ -66,23 +67,19 @@ class AuthService {
         }
     }
     // sign in user
-    async signIn(createuserDto) {
+    async signIn(loginUserDto) {
         let method;
-        let identifier;
-        if (!createuserDto.username && !createuserDto.email) {
+        let identifier = loginUserDto.identifier;
+        if (!loginUserDto.identifier ||
+            !loginUserDto.password) {
             throw_exception_1.ThrowException.badRequest("Username or email is required");
         }
-        if (createuserDto.username) {
-            method = user_service_1.LoginMethod.USERNAME;
-            identifier = createuserDto.username;
-        }
-        else if (createuserDto.email) {
+        const isActualEmail = (0, isEmail_1.default)(loginUserDto.identifier);
+        if (isActualEmail) {
             method = user_service_1.LoginMethod.EMAIL;
-            identifier = createuserDto.email;
         }
         else {
-            method = user_service_1.LoginMethod.INVALID;
-            identifier = "";
+            method = user_service_1.LoginMethod.USERNAME;
         }
         // find user by identifier
         const user = await this.userService.findByIdentifier(identifier, method);
@@ -98,7 +95,7 @@ class AuthService {
             throw_exception_1.ThrowException.unAuthenticated("Your account has been restricted");
         }
         //compare password
-        const isValid = await this.comparePassword(createuserDto.password, user === null || user === void 0 ? void 0 : user.password);
+        const isValid = await this.comparePassword(loginUserDto.password, user === null || user === void 0 ? void 0 : user.password);
         if (!isValid) {
             throw_exception_1.ThrowException.unAuthenticated("invalid credentials");
         }
