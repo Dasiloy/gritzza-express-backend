@@ -51,7 +51,7 @@ class EmailService {
     }
     async sendVerificationEmail(verificationEmailDto) {
         this.triggerMailAction();
-        const baseUrl = this.constructBaseUrl("verify-email", verificationEmailDto.token, verificationEmailDto.email);
+        const baseUrl = this.constructBaseUrl("/auth/verify-email", verificationEmailDto.token, verificationEmailDto.email);
         const html = `  <h2>hello ${verificationEmailDto.name}</h2>
     <p>Welcome to gritzza express</p>
     <p>
@@ -69,7 +69,7 @@ class EmailService {
     }
     async sendPasswordResetEmail(verificationEmailDto) {
         this.triggerMailAction();
-        const baseUrl = this.constructBaseUrl("reset-password", "token", "email");
+        const baseUrl = this.constructBaseUrl("/auth/reset-password", verificationEmailDto.token, verificationEmailDto.email);
         const html = `  <h2>hello ${verificationEmailDto.name}</h2>
         <p>Welcome to gritzza express</p>
         <p>

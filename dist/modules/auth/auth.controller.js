@@ -7,7 +7,7 @@ const auth_service_1 = require("./auth.service");
 async function signUp(req, res) {
     const createuserDto = req.body;
     const authService = new auth_service_1.AuthService();
-    const { user } = await authService.signUp(createuserDto);
+    const user = await authService.signUp(createuserDto);
     res.status(http_status_codes_1.StatusCodes.CREATED).json({
         email: user.email,
         username: user.username,

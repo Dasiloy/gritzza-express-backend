@@ -47,20 +47,11 @@ export class AuthService {
       token: verificationToken.token,
       name: user.username,
     });
-    return {
-      user,
-      token: verificationToken.token,
-    };
+    return user;
   }
 
   // verify user
   public async verifyUser(token: string, email: string) {
-    if (!email || !token) {
-      ThrowException.badRequest(
-        "email and token are required"
-      );
-    }
-
     return this.verificationTokenService.validateToken(
       token,
       email
@@ -73,7 +64,7 @@ export class AuthService {
       ThrowException.badRequest("email is required");
     }
 
-    const user = await this.userService.findByEmail(email); // find user  by mail
+    const user = await this.userService.findByEmailWithNoVerification(email); // find user  by mail
 
     if (user) {
       if (user.verified) {
@@ -91,7 +82,6 @@ export class AuthService {
         token: resendToken.token,
         name: user.username,
       });
-      return resendToken.token;
     }
   }
 
@@ -117,6 +107,8 @@ export class AuthService {
       method = LoginMethod.USERNAME;
     }
 
+
+    console.log(method,loginUserDto.identifier,loginUserDto.password);
     // find user by identifier
     const user = await this.userService.findByIdentifier(
       identifier,
@@ -201,7 +193,6 @@ export class AuthService {
       token: resendToken?.token as string,
       name: user?.username as string,
     });
-    return resendToken.token;
   }
 
   // reset password

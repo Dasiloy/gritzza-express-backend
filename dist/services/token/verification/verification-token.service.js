@@ -12,7 +12,7 @@ class verificationTokenService {
     constructor() {
         this.verificationTokenModel = verificationToken_model_1.verificationTokenModel;
         this.userService = new user_service_1.UserService();
-        this.TOKEN_EXPIRATION = 60 * 1000 * 10;
+        this.TOKEN_EXPIRATION = 60 * 1000 * 10; // 10 minutes
     }
     createHash() {
         const token = crypto_1.default.randomBytes(32).toString("hex");
@@ -28,11 +28,11 @@ class verificationTokenService {
             user: userId,
         });
         if (!verificationToken) {
-            throw_exception_1.ThrowException.unAuthenticated("Invalid token");
+            throw_exception_1.ThrowException.badRequest("Invalid token");
         }
         else if (Date.now() >
             new Date(verificationToken === null || verificationToken === void 0 ? void 0 : verificationToken.expiresAt).getTime()) {
-            throw_exception_1.ThrowException.unAuthenticated("Token expired");
+            throw_exception_1.ThrowException.badRequest("Token expired");
         }
         return verificationToken;
     }
@@ -51,14 +51,23 @@ class verificationTokenService {
             user: userId,
         });
         if (existingToken) {
-            return existingToken;
+            if (Date.now() >
+                new Date(existingToken === null || existingToken === void 0 ? void 0 : existingToken.expiresAt).getTime()) {
+                await existingToken.remove();
+            }
+            else {
+                return existingToken;
+            }
         }
         return this.createToken(userId);
     }
     // validate token
     async validateToken(token, email) {
         // find user with the email
-        const user = await this.userService.findByEmail(email);
+        const user = await this.userService.findByEmailWithNoVerification(email);
+        if (!user) {
+            throw_exception_1.ThrowException.badRequest("Invalid credentials");
+        }
         if (user === null || user === void 0 ? void 0 : user.verified) {
             throw_exception_1.ThrowException.badRequest("User already verified");
         }

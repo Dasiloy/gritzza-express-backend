@@ -9,7 +9,7 @@ import { AuthService } from "./auth.service";
 async function signUp(req: Request, res: Response) {
   const createuserDto: CreateUserDto = req.body;
   const authService = new AuthService();
-  const { user } = await authService.signUp(createuserDto);
+  const user = await authService.signUp(createuserDto);
   res.status(StatusCodes.CREATED).json({
     email: user.email,
     username: user.username,

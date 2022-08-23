@@ -63,7 +63,7 @@ export class EmailService {
   ) {
     this.triggerMailAction();
     const baseUrl = this.constructBaseUrl(
-      "verify-email",
+      "/auth/verify-email",
       verificationEmailDto.token,
       verificationEmailDto.email
     );
@@ -88,9 +88,9 @@ export class EmailService {
   ) {
     this.triggerMailAction();
     const baseUrl = this.constructBaseUrl(
-      "reset-password",
-      "token",
-      "email"
+      "/auth/reset-password",
+      verificationEmailDto.token,
+      verificationEmailDto.email
     );
     const html = `  <h2>hello ${verificationEmailDto.name}</h2>
         <p>Welcome to gritzza express</p>

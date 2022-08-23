@@ -34,16 +34,10 @@ class AuthService {
             token: verificationToken.token,
             name: user.username,
         });
-        return {
-            user,
-            token: verificationToken.token,
-        };
+        return user;
     }
     // verify user
     async verifyUser(token, email) {
-        if (!email || !token) {
-            throw_exception_1.ThrowException.badRequest("email and token are required");
-        }
         return this.verificationTokenService.validateToken(token, email);
     }
     // resend verification token
@@ -51,7 +45,7 @@ class AuthService {
         if (!email) {
             throw_exception_1.ThrowException.badRequest("email is required");
         }
-        const user = await this.userService.findByEmail(email); // find user  by mail
+        const user = await this.userService.findByEmailWithNoVerification(email); // find user  by mail
         if (user) {
             if (user.verified) {
                 throw_exception_1.ThrowException.badRequest("User already verified");
@@ -63,7 +57,6 @@ class AuthService {
                 token: resendToken.token,
                 name: user.username,
             });
-            return resendToken.token;
         }
     }
     // sign in user
@@ -81,6 +74,7 @@ class AuthService {
         else {
             method = user_service_1.LoginMethod.USERNAME;
         }
+        console.log(method, loginUserDto.identifier, loginUserDto.password);
         // find user by identifier
         const user = await this.userService.findByIdentifier(identifier, method);
         // if user not found
@@ -137,7 +131,6 @@ class AuthService {
             token: resendToken === null || resendToken === void 0 ? void 0 : resendToken.token,
             name: user === null || user === void 0 ? void 0 : user.username,
         });
-        return resendToken.token;
     }
     // reset password
     async resetPassword(token, email, password) {

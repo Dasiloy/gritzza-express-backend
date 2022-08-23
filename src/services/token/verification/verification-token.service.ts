@@ -6,7 +6,7 @@ import { verificationTokenModel } from "./verificationToken.model";
 export class verificationTokenService {
   private verificationTokenModel = verificationTokenModel;
   private userService: UserService = new UserService();
-  private TOKEN_EXPIRATION = 60 * 1000 * 10;
+  private TOKEN_EXPIRATION = 60 * 1000 * 10; // 10 minutes
 
   private createHash(): string {
     const token = crypto.randomBytes(32).toString("hex");
@@ -25,12 +25,12 @@ export class verificationTokenService {
       });
 
     if (!verificationToken) {
-      ThrowException.unAuthenticated("Invalid token");
+      ThrowException.badRequest("Invalid token");
     } else if (
       Date.now() >
       new Date(verificationToken?.expiresAt!).getTime()
     ) {
-      ThrowException.unAuthenticated("Token expired");
+      ThrowException.badRequest("Token expired");
     }
 
     return verificationToken;
@@ -56,7 +56,14 @@ export class verificationTokenService {
       });
 
     if (existingToken) {
-      return existingToken;
+      if (
+        Date.now() >
+        new Date(existingToken?.expiresAt!).getTime()
+      ) {
+        await existingToken.remove();
+      } else {
+        return existingToken;
+      }
     }
     return this.createToken(userId);
   }
@@ -64,7 +71,14 @@ export class verificationTokenService {
   // validate token
   public async validateToken(token: string, email: string) {
     // find user with the email
-    const user = await this.userService.findByEmail(email);
+    const user =
+      await this.userService.findByEmailWithNoVerification(
+        email
+      );
+
+    if (!user) {
+      ThrowException.badRequest("Invalid credentials");
+    }
 
     if (user?.verified) {
       ThrowException.badRequest("User already verified");
@@ -80,7 +94,7 @@ export class verificationTokenService {
       user.verified = true;
       await user.save();
     }
-    if (verificationToken) { 
+    if (verificationToken) {
       await verificationToken.remove();
     }
   }

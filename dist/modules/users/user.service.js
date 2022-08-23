@@ -27,6 +27,7 @@ class UserService {
     }
     // create user
     async createUser(createUserDto, config = { isAdmin: false }) {
+        var _a;
         // temp for new user
         const newUserTemp = {
             username: createUserDto.username,
@@ -40,21 +41,22 @@ class UserService {
         const existingUserByEmail = await this.UserModel.findOne({
             email: newUserTemp.email,
         });
-        if (existingUserByEmail) {
-            const isVerified = existingUserByEmail.verified;
-            throw_exception_1.ThrowException.conflict(isVerified
-                ? "User with this email already exists"
-                : "Verify your email");
-        }
         // check for existing user by username
         const existingUserByUsername = await this.UserModel.findOne({
-            username: newUserTemp.username,
+            username: (_a = newUserTemp.username) === null || _a === void 0 ? void 0 : _a.toLowerCase(),
         });
+        console.log(existingUserByUsername);
+        if (existingUserByEmail && existingUserByUsername) {
+            const isVerified = existingUserByEmail.verified;
+            throw_exception_1.ThrowException.badRequest(!isVerified
+                ? "Verify your Email"
+                : "User already exists");
+        }
+        if (existingUserByEmail) {
+            throw_exception_1.ThrowException.conflict("User with this email already exists");
+        }
         if (existingUserByUsername) {
-            const isVerified = existingUserByUsername.verified;
-            throw_exception_1.ThrowException.conflict(isVerified
-                ? "User with this username already exists"
-                : "Verify your email");
+            throw_exception_1.ThrowException.conflict("User with this username already exists");
         }
         // create user
         return users_model_1.userModel.create(config.isAdmin
@@ -126,9 +128,17 @@ class UserService {
         }
         return user;
     }
+    // find by email with no verification
+    // find by email
+    async findByEmailWithNoVerification(email) {
+        const user = await this.UserModel.findOne({ email });
+        return user;
+    }
     // find by username
     async findByUsername(username) {
-        const user = await this.UserModel.findOne({ username });
+        const user = await this.UserModel.findOne({
+            username: username.toLowerCase(),
+        });
         if (!user) {
             throw_exception_1.ThrowException.unAuthenticated("invalid credentials");
         }

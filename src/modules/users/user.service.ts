@@ -66,26 +66,32 @@ export class UserService {
       await this.UserModel.findOne({
         email: newUserTemp.email,
       });
-    if (existingUserByEmail) {
-      const isVerified = existingUserByEmail.verified;
-      ThrowException.conflict(
-        isVerified
-          ? "User with this email already exists"
-          : "Verify your email"
-      );
-    }
 
     // check for existing user by username
     const existingUserByUsername =
       await this.UserModel.findOne({
-        username: newUserTemp.username,
+        username: newUserTemp.username?.toLowerCase(),
       });
-    if (existingUserByUsername) {
-      const isVerified = existingUserByUsername.verified;
+
+    console.log(existingUserByUsername);
+    if (existingUserByEmail && existingUserByUsername) {
+      const isVerified = existingUserByEmail.verified;
+      ThrowException.badRequest(
+        !isVerified
+          ? "Verify your Email"
+          : "User already exists"
+      );
+    }
+
+    if (existingUserByEmail) {
       ThrowException.conflict(
-        isVerified
-          ? "User with this username already exists"
-          : "Verify your email"
+        "User with this email already exists"
+      );
+    }
+
+    if (existingUserByUsername) {
+      ThrowException.conflict(
+        "User with this username already exists"
       );
     }
     // create user
@@ -182,9 +188,20 @@ export class UserService {
     return user;
   }
 
+  // find by email with no verification
+  // find by email
+  public async findByEmailWithNoVerification(
+    email: string
+  ) {
+    const user = await this.UserModel.findOne({ email });
+    return user;
+  }
+
   // find by username
   public async findByUsername(username: string) {
-    const user = await this.UserModel.findOne({ username });
+    const user = await this.UserModel.findOne({
+      username: username.toLowerCase(),
+    });
     if (!user) {
       ThrowException.unAuthenticated("invalid credentials");
     }
